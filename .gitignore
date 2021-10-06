@@ -1,4 +1,5 @@
 .ipynb_checkpoints
+__pycache__
 __temp__.mp4
 models
 videos

@@ -6,4 +6,3 @@ https://alphacephei.com/vosk/
 
 
 https://github.com/alphacep/vosk-api
-   
