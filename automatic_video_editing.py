@@ -191,7 +191,7 @@ def segments_from_audio_silence(list_of_Words, threshold=2, offset=1):
     return segments
 
 
-def crop_video_by_segments(video, segments, result_path) -> None:
+def crop_video_by_segments(video, segments, result_path, bitrate=None) -> None:
     '''
     Crop video according to 'segments' list and
     save final video to 'result_path'.
@@ -201,6 +201,8 @@ def crop_video_by_segments(video, segments, result_path) -> None:
         segments (array): list of tuples (start_time, end_time).
                           Received from `segments_from_audio_*()` functions
         result_path (str): path to save final video
+        bitrate (str): bitrate for write_videofile function. 
+               Default is None, must be like '2500k', '5000k', '10000k', etc.
     '''
 
     print("\n\tStarting the video processing...")
@@ -212,14 +214,14 @@ def crop_video_by_segments(video, segments, result_path) -> None:
         clips.append(c)
 
     final_clip = mp.concatenate_videoclips(clips)
-    final_clip.write_videofile(result_path)
+    final_clip.write_videofile(result_path, bitrate=bitrate)
     final_clip.close()
 
     print("The video processing is completed")
 
 
 def main(model_path='', video_path='', result_path='', silence=True,
-         threshold=1, offset_silence=0.25, start_word='начало', end_word='конец', offset_words=0.5):
+         threshold=1, offset_silence=0.25, start_word='начало', end_word='конец', offset_words=0.5, bitrate=None):
     '''
     The main method of the program.
     Process 'video_path' video file. Convert video to audio, recognize audio to text using 'model_path' vosk model.
@@ -241,6 +243,8 @@ def main(model_path='', video_path='', result_path='', silence=True,
         end_word (str): control word that signals the ending of the video fragment to be cut.
                         Used only if silence==False
         offset_words (float): offset in seconds. Used only if silence==False
+        bitrate (str): bitrate for write_videofile function. 
+                       Default is None, must be like '2500k', '5000k', '10000k' etc.
 
     Returns:
         None
@@ -297,7 +301,8 @@ def main(model_path='', video_path='', result_path='', silence=True,
     # Video Processing
     crop_video_by_segments(video=clip,
                            segments=segments,
-                           result_path=result_path)
+                           result_path=result_path,
+                           bitrate=bitrate)
 
 
 if __name__ == '__main__':
@@ -314,6 +319,10 @@ if __name__ == '__main__':
     silence = True  # processing method
     # if True, process video with silence
     # if False - with control words
+    
+    # bitrate for write_videofile function. 
+    # Default is None, must be like '2500k', '5000k', '10000k' etc.
+    bitrate = None 
 
     # Next two parameters are used only if silence==True
 
@@ -333,4 +342,5 @@ if __name__ == '__main__':
 
     main(model_path=model_path, video_path=video_path, result_path=result_path,
          silence=silence, threshold=threshold, offset_silence=offset_silence,
-         start_word=start_word, end_word=end_word, offset_words=offset_words)
+         start_word=start_word, end_word=end_word, offset_words=offset_words, 
+         bitrate=bitrate)
