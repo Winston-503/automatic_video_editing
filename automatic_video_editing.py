@@ -18,7 +18,7 @@ import Word as custom_Word
 
 def recognize_audio_vosk(audio_path, model):
     '''
-    Recognize audio with vosk model.
+    Recognize audio using vosk model.
     Language of the recognition depends on model.
     Returns list of Word objects. Each of them has the following attributes:
         conf (float): degree of confidence, from 0 to 1
@@ -43,7 +43,7 @@ def recognize_audio_vosk(audio_path, model):
     rec = KaldiRecognizer(model, wf.getframerate())
     rec.SetWords(True)
 
-    print('Starting to convert audio to text. It may take some time...')
+    print('\n\tStarting to convert audio to text. It may take some time...')
     start_time = time.time()
 
     results = []
@@ -106,7 +106,7 @@ def segments_from_audio_control_words(list_of_Words, start_word='начало', 
         segments (array): list of tuples (start_time, end_time)
     '''
 
-    print("Starting the search for control words...")
+    print("\n\tStarting the search for control words...")
 
     # lists for start and end times
     starts = []
@@ -157,7 +157,7 @@ def segments_from_audio_silence(list_of_Words, threshold=2, offset=1):
         segments (array): list of tuples (start_time, end_time)
     '''
 
-    print("Starting the search for silence...")
+    print("\n\tStarting the search for silence...")
 
     # lists for start and end times
     starts = []
@@ -203,7 +203,7 @@ def crop_video_by_segments(video, segments, result_path) -> None:
         result_path (str): path to save final video
     '''
 
-    print("Starting the video processing...")
+    print("\n\tStarting the video processing...")
 
     clips = []  # list of all video fragments
     for start_seconds, end_seconds in segments:
@@ -222,7 +222,7 @@ def main(model_path='', video_path='', result_path='', silence=True,
          threshold=1, offset_silence=0.25, start_word='начало', end_word='конец', offset_words=0.5):
     '''
     The main method of the program.
-    Process 'video_path' video file. Convert video to audio, recognize audio to text with 'model_path' vosk model.
+    Process 'video_path' video file. Convert video to audio, recognize audio to text using 'model_path' vosk model.
     If silence == True, cut off silence moments > 'threshold'.  
     If silence == False, process according to control words - 'start_word' and 'end_word'.
     Save processed video to 'result_path'.
@@ -231,7 +231,7 @@ def main(model_path='', video_path='', result_path='', silence=True,
         model_path (str): path to vosk model downloaded from https://alphacephei.com/vosk/models
         video_path (str): path to video file to convert
         result_path (str): new filename to save final video
-        silence (bool): processing method. If True, process video with silence, if False - with control words
+        silence (bool): processing method. If True, process video with silence mode, if False - with control words
 
         threshold (float): threshold of silence time in seconds. Used only if silence==True
         offset_silence (float): offset in seconds. Used only if silence==True
@@ -315,13 +315,20 @@ if __name__ == '__main__':
     # if True, process video with silence
     # if False - with control words
 
-    # If silence == True
+    # Next two parameters are used only if silence==True
+
+    # threshold of silence time in seconds
     threshold = 1
+    # offset in seconds
     offset_silence = 0.25
 
-    # If silence == False
+    # Next three parameters are used only if silence==False
+
+    # control word that signals the beginning of the video fragment to be cut
     start_word = 'начало'
+    # control word that signals the ending of the video fragment to be cut
     end_word = 'конец'
+    # offset in seconds
     offset_words = 0.5
 
     main(model_path=model_path, video_path=video_path, result_path=result_path,
