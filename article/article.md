@@ -3,13 +3,13 @@
 
 Video editing is always tedious. Removing unnecessary video fragments is not a difficult task, but a long one. You need to review the video completely (and possibly more than once!), select all fragments you need, join them and then render the video for a long time. It usually takes more than three hours to simply edit an hour-long video! That's why I came up with this idea.
 
-Of course, alternatives exist. For example, [wisecat](https://www.wisecat.video/), which can do much more than cropping the video. But I want to make a fast, simple, and free program. Python libraries [moviepy](https://zulko.github.io/moviepy/) and [vosk](https://alphacephei.com/vosk/) will help me with this.
+Of course, alternatives exist. For example, [wisecat](https://www.wisecat.video/), which can do much more than "video cutting". But I want to make a fast, simple, and free program. Python libraries [moviepy](https://zulko.github.io/moviepy/) and [vosk](https://alphacephei.com/vosk/) will help me with this.
 
 ## Problem Statement
 
 I want to build a program that will automatically cut some video fragments and then join these fragments together. It has to receive data about these fragments in two ways:
-- Automated (partially automatic, with some human intervention) - with recognizing control words, and
-- Automatic (completely automatic, without human intervention) - with identifying long moments of silence
+- Automated (*partially automatic*, with some human intervention) - recognizing control words, and
+- Automatic (*completely automatic*, without human intervention) - identifying long moments of silence
 
 | ![video_editing.JPG](./img/video_editing.JPG) |
 |:--:|
@@ -18,7 +18,7 @@ I want to build a program that will automatically cut some video fragments and t
 The task can be divided into the following subtasks:
 1. Learn how to edit videos using moviepy
 2. Recognize control words/silence and their timestamps
-3. Put it all together
+3. Connect these two components together
 
 ## Video Editing with Moviepy
 
@@ -26,7 +26,7 @@ First, let's just try to cut and join the video using the *moviepy* library.
 
 It is very easy - after reading the source video into a `VideoFileClip` object we can do a lot of things with built methods. We will need the following ones:
 - `video.subclip(start_seconds, end_seconds)` which returns video fragment, cut from `video` from `start_seconds` to `end_seconds`
-- and `concatenate_videoclips(clips)` which put together all video fragments from `clips` list.
+- and `concatenate_videoclips(clips)` which join all video fragments from `clips` list.
 
 Put the list of all `(start_seconds, end_seconds)` pairs you need in the `segments` variable. Now you can use the following code to produce a video from its fragments.
 
@@ -39,7 +39,7 @@ video = mp.VideoFileClip("my_video.mp4")
 segments = [(0, 30),
             (60, None)]
 
-clips = [] # list of all video fragments
+clips = []  # list of all video fragments
 for start_seconds, end_seconds in segments:
     # crop a video clip and add it to list
     c = video.subclip(start_seconds, end_seconds)
@@ -47,6 +47,7 @@ for start_seconds, end_seconds in segments:
 
 final_clip = mp.concatenate_videoclips(clips)
 final_clip.write_videofile("my_new_video.mp4")
+final_clip.close()
 ```
 
 In fact, this simple program can already be very useful. It copes well with simple tasks (trim the beginning/end of the video, cut the desired fragment), and works much faster than professional video editing programs (Sony Vegas, etc).
@@ -57,7 +58,9 @@ Now, all we have to do is to get these pairs (`segments`) from an intelligent sy
 
 This task is more complicated. As a result of searching and experimenting, I decided to use the [vosk API](https://alphacephei.com/vosk/). A detailed tutorial on how to implement speech recognition with timestamps with this library you can find in [this article](https://towardsdatascience.com/speech-recognition-with-timestamps-934ede4234b2). But I will try to briefly describe the most important points here too.
 
-First of all, we need to recognize speech using the vosk model. As I explained in the article above, the vosk speech recognition model outputs a list of JSON dictionaries, that contains four parameters for each recognized word - `confidence`, `start time`, `end time` and recognized `word`. I created a custom `Word` class, that describes words according to this format. The following code recognized `audio_filename` file and outputs a list of `Word` objects. 
+First of all, we need to recognize speech using the vosk model. As I explained in the article above, the vosk speech recognition model outputs a list of JSON dictionaries, that contains four parameters for each recognized word - `confidence`, `start time`, `end time` and recognized `word` (text). I created a custom `Word` class, which describes words according to this format. 
+
+The following code recognizes `audio_filename` file with `model_path` vosk model and outputs a list of `Word` objects. 
 
 ```python
 import wave
@@ -106,26 +109,26 @@ for word in list_of_words:
 
 ## Recognize Control Words
 
-Now we know the time of pronouncing each word. There is room for creativity because we need to choose control words. We need two - for the start and the end of the cut fragment.
+We know the time of pronouncing each word. That's great! Now we need to choose control words - there is room for creativity. We need two - for the start and the end of the cut fragment.
 
-You can't just use *start* and *stop*. In fact, of course, you can, but you can't be sure that you won't say these words in your usual speech. And in this case, the program will work incorrectly. Initially, I decided to use some rare English words like *sagacious* and *egregious*. But it turned out that rare words are worse recognized, and very rare ones may not be in the dictionary at all. Also at this moment, I realized how much the accent affects speech recognition quality.  Because I'm not a native English speaker, I decided to move on to a simpler solution.
+You can't just use *start* and *stop*. In fact, of course, you can, but you can't be sure that you won't say these words in your usual speech. And if you say, the program will work incorrectly. Initially, I decided to use some rare English words like *sagacious* and *egregious*. But it turned out that rare words are worse recognized, and very rare ones may not be in the dictionary at all. Also at this moment, I realized how much the accent affects speech recognition quality.  Because I'm not a native English speaker, I decided to move on to a simpler solution.
 
-I decided to just use the words *start* and *end* in my native language. Since vosk has foreign models, you can recognize the speech with your native language model. The text will be recognized as nonsense, but we don't need it, right? The main thing is that the *control words* will be recognized. In Russian, they are written as **начало** and **конец**, and pronounced like **nachalo** and **konets**, respectively. The first word indicates the beginning of the fragment to be cut, and the second - its end.
+I decided to just use the words *start* and *end* in my native language. Since vosk has foreign models, you can recognize the English speech using your native language model. The text will be recognized as nonsense, but we don't need it, right? The main thing is that the *control words* will be recognized correctly. In Russian, they are written as **начало** and **конец**, and pronounced like **nachalo** and **konets**, respectively. The first word indicates the beginning of the fragment to be cut, and the second - its end.
 
 | ![english_speech_russian_model.jpg](./img/english_speech_russian_model.jpg) |
 |:--:|
-| <b>Example of English speech recognition with a Russian model. Image by Author</b>|
+| <b>Example of English speech recognition using a Russian model. Image by Author</b>|
 
-It is possible to recognize *combinations of English words* as control commands. You can go even further and recognize sounds - for example, finger clicks or clapping. However, it seemed less convenient to me.
+It is also possible to recognize *combinations of English words* as control commands. You can go even further and recognize sounds - for example, finger clicks or clapping. However, it seemed less convenient to me.
 
-Now we need to iterate through the `list_of_words` and check whether the recognized word is one of the control words. If yes, then we remember the time (start time for start_word and end time for end_word). I also created the `offset` variable to be sure that the cropping of the video is not too sharp.
+Now we need to iterate through the `list_of_words` and check whether the recognized word is one of the control words. If yes, then we remember the time (start time for `start_word` and end time for `end_word`). I also created the `offset` variable to be sure that the cropping of the video is not too sharp.
 
 ```python
 # list_of_Words received earlier
 
 start_word = "начало"
 end_word = "конец"
-offset = 0.5  # seconds
+offset = 0.5  # in seconds
 
 # lists for start and end times
 starts = []
@@ -158,11 +161,12 @@ After that, all that remains is to pass the `segments` variable to the code snip
 
 ## Recognize Silence
 
-Another option is to cut out the moments when silence lasts longer than a certain threshold (for example 2 seconds). Almost everything here is already familiar to us, you can see the code below.
+Another option is to cut out the moments when silence lasts longer than a certain threshold (for example 2 seconds). Almost everything here is already familiar to us.
 
 ```python
 # list_of_Words received earlier
 
+offset = 0.5  # in seconds
 threshold = 2  # in seconds
 # if silence lasts longer than treshold value, 
 # this fragment will be cut
@@ -198,7 +202,7 @@ print(segments)
 
 This approach is fully automated and does not require any human intervention during or after video recording. You just specify the path to the video and get the video without silent moments.
 
-## Put it all together
+## Final Program
 
 The two main components of the program are ready to use, we need only to connect them. The only moment that was not described is the conversion of video to mono audio. But *moviepy* can easily cope with this.
 
@@ -224,29 +228,64 @@ automatic_video_editing
 │   └───vosk-model-ru-0.10
 ├───videos
 │   .gitignore
+│   
 │   automatic_video_cutter.ipynb
+│   automatic_video_cutter.py
 │   Word.py
-|
+│
 │   README.md
 └── requirements.txt
 ```
 
-Let’s talk about folders:
+It contains the following folders:
 - The `article` folder contains the data for this tutorial.
-- The `models` folder contains trained vosk models downloaded from [official site](https://alphacephei.com/vosk/models).
+- The `models` folder contains vosk models downloaded from [official site](https://alphacephei.com/vosk/models).
 - The `videos` folder contains videos to be processed.
-Сode files:
-- `Word.py` file describes `Word` class.
-- `automatic_video_cutter.ipynb` notebook contains full program with all the necessary verifications. You need to specify: path to the vosk model, path to video file, silence?
-- 
-- `script.py` file is ready-to-use python script. See `README.md` file for user manual. 
+  
+And code files:
+- `Word.py` file describes the `Word` class.
+- `automatic_video_cutter.ipynb` notebook contains a full program.
+- `automatic_video_cutter.py` file contains the same full program but in the form of a python script. It can be used to run a program without [Jupyter Notebook](https://jupyter.org/).
+
+See `README.md` for the user manual.
 
 ## Results and Conclusions
 
-- Moviepy supports all video extensions supported by ffmpeg: .ogv, .mp4, .mpeg, .avi, .mov, .mkv etc.
-- Quality of rendering
-- Videos
-- Times
+As a result, the program works as follows: 
 
-https://zulko.github.io/moviepy/ref/VideoClip/VideoClip.html#moviepy.video.VideoClip.VideoClip.write_videofile
+Automatic Video Editing - Control Words on Youtube:
+[![Automatic Video Editing - Control Words on Youtube](https://img.youtube.com/vi/Y8HlXMrDBrc/0.jpg)](https://www.youtube.com/watch?v=Y8HlXMrDBrc)
+
+Automatic Video Editing - Silence on Youtube:
+[![Automatic Video Editing - Silence on Youtube](https://img.youtube.com/vi/70EVCKNSsdI/0.jpg)](https://www.youtube.com/watch?v=70EVCKNSsdI)
+
+I am pleased with the result, but there are a lot of moments to discuss. 
+
+### Supported Video Formats
+
+First of all, about **supported formats**. This program uses *moviepy*, and *moviepy* supports all video extensions supported by *ffmpeg*: .ogv, .mp4, .mpeg, .avi, .mov, .mkv, etc.
+
+### Execution Time
+
+Next, about the execution time. I tested the program a few times with videos of different lengths (from 1 minute to 17). Based on these experiments, I can say that **the time of full video processing is less than the length of the original video file**. The execution time may vary depending on the hardware, but the proportions will be preserved.
+
+| ![results_time.jpg](./img/results_time.jpg) |
+|:--:|
+| <b>Program execution time for a 17 minute video. Image by Author</b>|
+
+First, you need to read the vosk model. But this stage is constant (does not depend on the length of the video) and takes about 30 seconds. Then there are four main stages of the program:
+- **Convert Video to Audio** - executes not in constant time, but very quickly (less than 1 percent of the initial length of the video)
+- **Speech Recognition using Vosk Model** - experiments have shown that you need about `0.2*X` seconds to recognize audio of length `X` seconds.
+- **Analysis of Recognized Text, get `segments`** - executes instantly. I didn't notice the difference when processing a video one minute long and 17 minutes long.
+- **Rendering** - the longest stage. With default parameters, its execution takes about `0.5*X` time.
+
+## Video Quality
+
+The question that arises after studying the execution time is - what about the quality? After all, the faster the render, the worse the quality, and here the render is quite fast.
+
+Yes, it is. The rendering is done using the `write_videofile` method, and it has a lot of parameters. I use its default values. But the most important parameter is `bitrate`.
+
+Default `bitrate` value is `None`, and it's about `'2500k'` (I couldn't find the exact value in the documentation). At this value, the video is **compressed twice**, but I don't notice any particular loss of quality. You can set the value higher - `'5000k'` or `'10000k'` and then the video size will be close to the original. This will also slow down rendering (but not too much).
+
+If you want to get more into this, you can start with [moviepy write_videofile method documentation](https://zulko.github.io/moviepy/ref/VideoClip/VideoClip.html#moviepy.video.VideoClip.VideoClip.write_videofile).
 
