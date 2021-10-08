@@ -31,6 +31,8 @@ Next open `automatic_video_cutter.py` file with any text editor and set the para
 - `end_word` - control word that signals the ending of the video fragment to be cut. Used only if silence==False;
 - `offset_words` - offset in seconds. Used only if silence==False.
 
+Now you can run the script using `python automatic_video_cutter.py` command.
+
 If you can use [Jupyter Notebook](https://jupyter.org/) you can open `automatic_video_cutter.ipynb` file and specify these parameters in **Set parameters** 14 cell. Path to the vosk model is specified earlier - in **Loading a vosk model** section, 11 cell.
 
 ## Project Structure
