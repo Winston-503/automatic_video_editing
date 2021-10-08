@@ -13,7 +13,7 @@ I want to build a program that will automatically cut some video fragments and t
 
 | ![video_editing.JPG](./img/video_editing.JPG) |
 |:--:|
-| <b>Two approaches to video editing. Image by Author</b>|
+| <b>Two approaches to automatic video editing. Image by Author</b>|
 
 The task can be divided into the following subtasks:
 1. Learn how to edit videos using moviepy
@@ -56,7 +56,7 @@ Now, all we have to do is to get these pairs (`segments`) from an intelligent sy
 
 ## A Brief Overview of Speech Recognition with Timestamps
 
-This task is more complicated. As a result of searching and experimenting, I decided to use the [vosk API](https://alphacephei.com/vosk/). A detailed tutorial on how to implement speech recognition with timestamps with this library you can find in [this article](https://towardsdatascience.com/speech-recognition-with-timestamps-934ede4234b2). But I will try to briefly describe the most important points here too.
+This task is more complicated. As a result of searching and experimenting, I decided to use the [vosk API](https://alphacephei.com/vosk/). I described a detailed tutorial on how to implement speech recognition with timestamps in [this article](https://towardsdatascience.com/speech-recognition-with-timestamps-934ede4234b2). But I will try to briefly describe the most important points here too.
 
 First of all, we need to recognize speech using the vosk model. As I explained in the article above, the vosk speech recognition model outputs a list of JSON dictionaries, that contains four parameters for each recognized word - `confidence`, `start time`, `end time` and recognized `word` (text). I created a custom `Word` class, which describes words according to this format. 
 
@@ -254,9 +254,11 @@ See `README.md` for the user manual.
 As a result, the program works as follows: 
 
 Automatic Video Editing - Control Words on Youtube:
+
 [![Automatic Video Editing - Control Words on Youtube](https://img.youtube.com/vi/Y8HlXMrDBrc/0.jpg)](https://www.youtube.com/watch?v=Y8HlXMrDBrc)
 
 Automatic Video Editing - Silence on Youtube:
+
 [![Automatic Video Editing - Silence on Youtube](https://img.youtube.com/vi/70EVCKNSsdI/0.jpg)](https://www.youtube.com/watch?v=70EVCKNSsdI)
 
 I am pleased with the result, but there are a lot of moments to discuss. 
@@ -271,7 +273,7 @@ Next, about the execution time. I tested the program a few times with videos of 
 
 | ![results_time.jpg](./img/results_time.jpg) |
 |:--:|
-| <b>Program execution time for a 17 minute video. Image by Author</b>|
+| <b>Program execution time for a 17-minute video. Image by Author</b>|
 
 First, you need to read the vosk model. But this stage is constant (does not depend on the length of the video) and takes about 30 seconds. Then there are four main stages of the program:
 - **Convert Video to Audio** - executes not in constant time, but very quickly (less than 1 percent of the initial length of the video)
@@ -281,11 +283,27 @@ First, you need to read the vosk model. But this stage is constant (does not dep
 
 ## Video Quality
 
-The question that arises after studying the execution time is - what about the quality? After all, the faster the render, the worse the quality, and here the render is quite fast.
+The question that arises after exploring the execution time is - what about the quality? After all, the faster the render, the worse the quality. And here the render is quite fast.
 
-Yes, it is. The rendering is done using the `write_videofile` method, and it has a lot of parameters. I use its default values. But the most important parameter is `bitrate`.
+Yes, it is. The rendering is done using the `write_videofile` moviepy method, and it has a lot of parameters. I used its default values. 
 
-Default `bitrate` value is `None`, and it's about `'2500k'` (I couldn't find the exact value in the documentation). At this value, the video is **compressed twice**, but I don't notice any particular loss of quality. You can set the value higher - `'5000k'` or `'10000k'` and then the video size will be close to the original. This will also slow down rendering (but not too much).
+I won't talk much about rendering, but the most important parameter is `bitrate`. Bitrate is the number of bits that are used to process the information in a given unit of time. The more bitrate you use, the better quality you get. At the same time, your file will be larger.
+
+Default `bitrate` value is `None`, and it's about `'2000k'` (I couldn't find the exact value in the documentation, and found this value experimentally). Using this value, the video is **a bit compressed, but I don't notice any particular loss of quality**.
+
+You can set the higher value to get better quality. This will also slow down rendering (but not too much). I conducted an experiment and rendered a video with a bitrate from `'1000k'` to `'10000k'` - the rendering time with the minimum and maximum values differed by 50%. That's how I found out the approximate default value.
+
+| ![bitrates.jpg](./img/bitrates.jpg) |
+|:--:|
+| <b>Different bitrate values and output file sizes. Image by Author</b>|
+
+If we calculate the file size by proportion (the initial video lasted 61 seconds and was 11.6 MB, and the processed one lasts 24 seconds), we get a value of 4.5 MB. So default bitrate is enough.
+
+This can be also related to initial video quality. I used my webcam to record the video, so it's not very good. Below you can see the quality comparison. And if there is a difference for a webcam, then for screen capture even the lowest bitrate shows a good result.
+
+| ![comparison.jpg](./img/comparison.jpg) |
+|:--:|
+| <b>The quality comparison for different bitrates. Image by Author</b>|
 
 If you want to get more into this, you can start with [moviepy write_videofile method documentation](https://zulko.github.io/moviepy/ref/VideoClip/VideoClip.html#moviepy.video.VideoClip.VideoClip.write_videofile).
 
