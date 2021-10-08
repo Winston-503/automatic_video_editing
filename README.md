@@ -25,8 +25,13 @@ Next open `automatic_video_cutter.py` file with any text editor and set the para
 - `video_path` - path to video file to convert;
 - `result_path` - new filename to save final video;
 - `silence` - processing method. If True, process video with silence mode, if False - with control words;
+- `bitrate` - bitrate for write_videofile function. Default is None, must be like '2500k', '5000k', '10000k' etc.
+
+
 - `threshold` - threshold of silence time in seconds. Used only if silence==True;
 - `offset_silence` - offset in seconds. Used only if silence==True;
+
+
 - `start_word` - control word that signals the beginning of the video fragment to be cut. Used only if silence==False;
 - `end_word` - control word that signals the ending of the video fragment to be cut. Used only if silence==False;
 - `offset_words` - offset in seconds. Used only if silence==False.
