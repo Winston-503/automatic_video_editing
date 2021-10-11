@@ -1,5 +1,5 @@
-# Automatic Video Editing
-## How to implement automatic video editing using Python, moviepy and vosk
+# Automatic Video Editing using Python
+## How to implement voice control or remove silent moments from your video using Python libraries moviepy and vosk
 
 Video editing is always tedious. Removing unnecessary video fragments is not a difficult task, but a long one. You need to review the video completely (and possibly more than once!), select all fragments you need, join them and then render the video for a long time. It usually takes more than three hours to simply edit an hour-long video! That's why I came up with this idea.
 
@@ -13,7 +13,7 @@ I want to build a program that will automatically cut some video fragments and t
 
 | ![video_editing.JPG](./img/video_editing.JPG) |
 |:--:|
-| <b>Two approaches to automatic video editing. Image by Author</b>|
+| <b>Two approaches to solving the automatic video editing problem. Image by Author</b>|
 
 The task can be divided into the following subtasks:
 1. Learn how to edit videos using moviepy
@@ -58,9 +58,9 @@ Now, all we have to do is to get these pairs (`segments`) from an intelligent sy
 
 This task is more complicated. As a result of searching and experimenting, I decided to use the [vosk API](https://alphacephei.com/vosk/). I described a detailed tutorial on how to implement speech recognition with timestamps in [this article](https://towardsdatascience.com/speech-recognition-with-timestamps-934ede4234b2). But I will try to briefly describe the most important points here too.
 
-First of all, we need to recognize speech using the vosk model. As I explained in the article above, the vosk speech recognition model outputs a list of JSON dictionaries, that contains four parameters for each recognized word - `confidence`, `start time`, `end time` and recognized `word` (text). I created a custom `Word` class, which describes words according to this format. 
+First of all, we need to recognize speech from our video file. As I explained in the article above, the vosk speech recognition model outputs a list of JSON dictionaries, that contains four parameters for each recognized word - `confidence`, `start time`, `end time` and recognized `word` (text). I created a custom `Word` class, which describes words according to this format. 
 
-The following code recognizes `audio_filename` file with `model_path` vosk model and outputs a list of `Word` objects. 
+The following code recognizes `audio_filename` file using `model_path` vosk model and outputs a list of `Word` objects. 
 
 ```python
 import wave
