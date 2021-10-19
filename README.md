@@ -6,7 +6,7 @@ Automatic video editing with Python, [moviepy](https://zulko.github.io/moviepy/)
 
 ## Tutorial
 
-You can read detailed tutorial on [Medium]() or directly [on GitLab](https://gitlab.com/Winston-90/automatic_video_editing/-/blob/main/article/article.md).
+You can read detailed tutorial on [Towards Data Science](https://towardsdatascience.com/automatic-video-editing-using-python-324e5efd7eba) or directly [on GitLab](https://gitlab.com/Winston-90/automatic_video_editing/-/blob/main/article/article.md).
 
 ## Results
 
