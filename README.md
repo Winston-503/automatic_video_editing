@@ -2,11 +2,11 @@
 
 Automatic video editing with Python, [moviepy](https://zulko.github.io/moviepy/) and [vosk API](https://alphacephei.com/vosk/)
 
-![video_editing.JPG](./article/img/video_editing_preview.jpg)
+![video_editing.JPG](./img/preview.jpg)
 
 ## Tutorial
 
-You can read detailed tutorial on [Towards Data Science](https://towardsdatascience.com/automatic-video-editing-using-python-324e5efd7eba) or directly [on GitLab](https://gitlab.com/Winston-90/automatic_video_editing/-/blob/main/article/article.md).
+You can read detailed tutorial on [Towards Data Science](https://towardsdatascience.com/automatic-video-editing-using-python-324e5efd7eba).
 
 ## Results
 
@@ -46,7 +46,6 @@ The project has the following structure:
 
 ```
 automatic_video_editing
-├───article
 ├───models
 │   ├───vosk-model-en-us-0.21
 │   └───vosk-model-ru-0.10
@@ -62,7 +61,6 @@ automatic_video_editing
 ```
 
 It contains the following folders:
-- The `article` folder contains the data for this tutorial.
 - The `models` folder contains vosk models downloaded from [official site](https://alphacephei.com/vosk/models).
 - The `videos` folder contains videos to be processed.
   
