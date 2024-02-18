@@ -1,4 +1,4 @@
-# Automatic Video Editing
+# Automatic Video Editing 
 
 Automatic video editing with Python, [moviepy](https://zulko.github.io/moviepy/) and [vosk API](https://alphacephei.com/vosk/)
 
